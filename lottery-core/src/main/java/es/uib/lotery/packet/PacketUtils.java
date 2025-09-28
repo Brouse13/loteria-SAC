@@ -13,6 +13,10 @@ public class PacketUtils {
         buffer.put(bytes);
     }
 
+    public static void putBoolean(ByteBuffer buffer, boolean b) {
+        buffer.put((byte) (b ? 1 : 0));
+    }
+
     public static void putByte(ByteBuffer buffer, byte b) {
         buffer.put(b);
     }
@@ -24,14 +28,18 @@ public class PacketUtils {
         buffer.putLong(value);
     }
 
-    public static String readString(ByteBuffer buffer) {
+    public static String getString(ByteBuffer buffer) {
         int length = buffer.getInt();
         byte[] bytes = new byte[length];
         buffer.get(bytes, 0, length);
         return new String(bytes);
     }
 
-    public static byte readByte(ByteBuffer buffer) {
+    public static boolean getBoolean(ByteBuffer buffer) {
+        return buffer.get() == 1;
+    }
+
+    public static byte getByte(ByteBuffer buffer) {
         return buffer.get();
     }
     public static int getInt(ByteBuffer buffer) {
