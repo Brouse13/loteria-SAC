@@ -8,6 +8,8 @@ public class PacketBuilder {
     public static final byte DNS_RESPONSE_PACKET_ID = 0x01;
     public static final byte DRAW_REQUEST_PACKET_ID = 0x02;
     public static final byte DRAW_RESPONSE_PACKET_ID = 0x03;
+    public static final byte SELLER_REQUEST_PACKET_ID = 0x04;
+    public static final byte SELLER_RESPONSE_PACKET_ID = 0x05;
 
 
     public static final PacketBuilder INSTANCE = new PacketBuilder();
@@ -23,6 +25,8 @@ public class PacketBuilder {
             case DNS_RESPONSE_PACKET_ID -> packet = new DNSResponsePacket();
             case DRAW_REQUEST_PACKET_ID -> packet = new DrawRequestPacket();
             case DRAW_RESPONSE_PACKET_ID -> packet = new DrawResponsePacket();
+            case SELLER_REQUEST_PACKET_ID -> packet = new SellerRequestPacket();
+            case SELLER_RESPONSE_PACKET_ID -> packet = new SellerResponsePacket();
         }
 
         // If no matching id for packet return null
