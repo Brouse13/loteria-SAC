@@ -1,9 +1,11 @@
 ﻿package es.uib.lotery.packet;
 
+import java.nio.ByteBuffer;
+
 public interface BasePacket {
     int getId();
 
-    byte[] encode(BasePacket buffer);
+    byte[] encode(ByteBuffer buffer);
 
-    BasePacket decode(byte[] bytes);
+    BasePacket decode(ByteBuffer buffer);
 }

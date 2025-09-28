@@ -7,7 +7,7 @@ import java.net.InetSocketAddress;
 import java.util.function.Consumer;
 
 public interface ServerConnection {
-    boolean start(InetSocketAddress address) throws IOException;
+    boolean start(InetSocketAddress address);
 
     void stop();
 
