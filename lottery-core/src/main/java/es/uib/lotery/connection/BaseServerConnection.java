@@ -3,7 +3,6 @@ package es.uib.lotery.connection;
 import es.uib.lotery.packet.BasePacket;
 import es.uib.lotery.packet.PacketBuilder;
 import es.uib.lotery.packet.PacketHandleRegistry;
-import lombok.AllArgsConstructor;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -17,12 +16,15 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-@AllArgsConstructor
 public class BaseServerConnection implements ServerConnection {
     private ServerSocketChannel serverSocketChannel;
     private final PacketHandleRegistry handleRegistry;
     private Selector selector;
     private ByteBuffer buffer;
+
+    public BaseServerConnection(PacketHandleRegistry handleRegistry) {
+        this.handleRegistry = handleRegistry;
+    }
 
     @Override
     public boolean start(InetSocketAddress address) {
