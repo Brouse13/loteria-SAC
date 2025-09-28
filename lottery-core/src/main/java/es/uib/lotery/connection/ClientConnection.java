@@ -1,4 +1,4 @@
-﻿package es.uib.lotery.connection;
+package es.uib.lotery.connection;
 
 import es.uib.lotery.packet.BasePacket;
 

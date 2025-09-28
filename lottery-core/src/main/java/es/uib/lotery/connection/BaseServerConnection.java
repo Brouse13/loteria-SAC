@@ -14,7 +14,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
 public class BaseServerConnection implements ServerConnection {
     private ServerSocketChannel serverSocketChannel;
@@ -75,7 +74,7 @@ public class BaseServerConnection implements ServerConnection {
     }
 
     @Override
-    public boolean request(String packetName, Consumer<BasePacket> callback) throws IOException {
+    public void listen() throws IOException {
         while (true) {
 
             // Obtención de las claves de selección que representan los canales listos
@@ -91,7 +90,7 @@ public class BaseServerConnection implements ServerConnection {
                 if (key.isAcceptable()) register();
 
                 // Si la clave es legible, procesa el mensaje del cliente
-                if (key.isReadable()) clientEcho(key);
+                if (key.isReadable()) reply(key);
 
                 iterator.remove();
             }
@@ -100,7 +99,7 @@ public class BaseServerConnection implements ServerConnection {
 
     private void register() throws IOException {
 
-        // Acepta la conexión del cliente en el socket, en modo lectura
+        // Accept socket in read mode
         SocketChannel client = serverSocketChannel.accept();
         client.configureBlocking(false);
         client.register(selector, SelectionKey.OP_READ);
@@ -108,14 +107,13 @@ public class BaseServerConnection implements ServerConnection {
         System.out.printf("[SERVER] %s connected\n", client.getRemoteAddress());
     }
 
-    private void clientEcho(SelectionKey key) {
+    private void reply(SelectionKey key) {
         SocketChannel client = (SocketChannel) key.channel();
 
         try {
             buffer.clear();
             int bytes = client.read(buffer);
 
-            // Si el cliente cierra la conexión
             if (bytes == -1) {
                 System.out.printf("[SERVER] %s close connection\n", client.getRemoteAddress());
                 client.close();
@@ -127,7 +125,6 @@ public class BaseServerConnection implements ServerConnection {
             BasePacket packet = PacketBuilder.INSTANCE.buildPacket(buffer);
             System.out.printf("[SERVER] <-- %s (%s)\n", client.getRemoteAddress(), packet);
 
-            // Obtención de respuestas generadas al procesar el paquete
             List<BasePacket> responses = handleRegistry.handlePacket(packet);
 
             // No responses
@@ -140,7 +137,6 @@ public class BaseServerConnection implements ServerConnection {
                 buffer.flip();
                 client.write(buffer);
             }
-
         } catch (IOException e) {
             this.stop();
         }
