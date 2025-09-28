@@ -1,8 +1,8 @@
 package es.uib.lotery;
 
 import es.uib.lotery.connection.BaseClientConnection;
+import es.uib.lotery.entity.Ticket;
 import es.uib.lotery.packet.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -19,14 +19,12 @@ import java.util.List;
 @Setter
 public class Client {
     private final String name;
-    private final List<Ticket> tickets;
-    private final BaseClientConnection connection;
+    private final List<Ticket> tickets = new ArrayList<>();
+    private final BaseClientConnection connection = new BaseClientConnection();
     private InetSocketAddress DNSAddress;
 
     public Client(String name) {
         this.name = name;
-        this.tickets = new ArrayList<Ticket>();
-        this.connection = new BaseClientConnection();
     }
 
     public List<Ticket> getTickets() {
@@ -45,26 +43,19 @@ public class Client {
         connection.disconnect();
     }
 
-    public boolean DNSConnectionTicket(BasePacket dnsRequest) {
-
-        DNSRequestPacket dnsPacket = (DNSRequestPacket) dnsRequest;
-        return connection.send(dnsPacket, (response) -> {
-            if(! (response instanceof DNSResponsePacket)) {return;};
+    public boolean DNSConnectionTicket(DNSRequestPacket dnsRequest) {
+        return connection.send(dnsRequest, (response) -> {
+            if(! (response instanceof DNSResponsePacket)) {return;}
 
             this.DNSAddress = ((DNSResponsePacket) response).getAddress();
-
         });
     }
 
-    public boolean recieveTicket(BasePacket recievePacket) {
-        SellerRequestPacket lasPaquet = (SellerRequestPacket) recievePacket;
-        return connection.send(lasPaquet, (response) -> {
-            if(!( response instanceof SellerResponsePacket)) {return;};
+    public boolean recieveTicket(SellerRequestPacket requestPacket) {
+        return connection.send(requestPacket, (response) -> {
+            if(!(response instanceof SellerResponsePacket sellerResponsePacket)) return;
 
-            //tengo que hacer que el paquete devuelva cosas :P
-
-            Ticket ticket = new Ticket();
-            tickets.add(ticket);
+            tickets.add(sellerResponsePacket.getTicket());
         });
     }
 
@@ -73,10 +64,3 @@ public class Client {
     }
 }
 
-@Setter
-@Getter
-@AllArgsConstructor
-class Ticket{
-    private String number;
-    private int sorteo;
-}

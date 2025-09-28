@@ -4,7 +4,7 @@ import es.uib.lotery.packet.DNSRequestPacket;
 import es.uib.lotery.packet.SellerRequestPacket;
 
 public class ClientSocket {
-        public static void main(String[] args) throws Exception {
+        public static void main(String[] args) {
             if (args.length < 3) {
                 System.out.println("Uso: java LotteryClient <dnsHost> <dnsPort> <clientName>");
                 return;
