@@ -7,13 +7,14 @@ import lombok.NoArgsConstructor;
 
 import java.nio.ByteBuffer;
 
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class DrawResponsePacket implements BasePacket {
-    @Getter public static final byte id = PacketBuilder.DRAW_RESPONSE_PACKET_ID;
-    @Getter private boolean hasPrice;
-    @Getter private int price;
+    public final byte id = PacketBuilder.DRAW_RESPONSE_PACKET_ID;
+    private boolean hasPrice;
+    private int price;
 
     @Override
     public void encode(ByteBuffer buffer) {

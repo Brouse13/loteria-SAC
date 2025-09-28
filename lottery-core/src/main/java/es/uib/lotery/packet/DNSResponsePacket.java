@@ -8,12 +8,13 @@ import lombok.NoArgsConstructor;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class DNSResponsePacket implements BasePacket {
-    @Getter public static final byte id = PacketBuilder.DNS_RESPONSE_PACKET_ID;
-    @Getter private InetSocketAddress address;
+    public final byte id = PacketBuilder.DNS_RESPONSE_PACKET_ID;
+    private InetSocketAddress address;
 
     @Override
     public void encode(final ByteBuffer buffer) {

@@ -7,12 +7,13 @@ import lombok.NoArgsConstructor;
 
 import java.nio.ByteBuffer;
 
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class DNSRequestPacket implements BasePacket {
-    @Getter public static final byte id = PacketBuilder.DNS_REQUEST_PACKET_ID;
-    @Getter private String serverName;
+    public final byte id = PacketBuilder.DNS_REQUEST_PACKET_ID;
+    private String serverName;
 
     @Override
     public void encode(ByteBuffer buffer) {
