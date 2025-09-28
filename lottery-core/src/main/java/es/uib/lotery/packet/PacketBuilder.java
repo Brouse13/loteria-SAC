@@ -1,4 +1,4 @@
-﻿package es.uib.lotery.packet;
+package es.uib.lotery.packet;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
