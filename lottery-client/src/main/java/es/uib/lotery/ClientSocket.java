@@ -3,6 +3,8 @@ package es.uib.lotery;
 import es.uib.lotery.packet.DNSRequestPacket;
 import es.uib.lotery.packet.SellerRequestPacket;
 
+import java.util.Random;
+
 public class ClientSocket {
     public static void main(String[] args) {
         if (args.length < 3) {
@@ -31,10 +33,17 @@ public class ClientSocket {
             client.DNSConnectionTicket(packet);
             client.disconnect();
         }
-
-        if (client.connectToServer()) {
-            SellerRequestPacket packet = SellerRequestPacket.builder().build();
-            client.receiveTicket(packet);
+        
+        while (true){
+            Random random = new Random();
+            if (1 == random.nextInt(10)) {
+                if (client.connectToServer()) {
+                    SellerRequestPacket packet = SellerRequestPacket.builder().build();
+                    client.receiveTicket(packet);
+                    client.disconnect();
+                }
+                client.listTickets();
+            }
         }
     }
 }
