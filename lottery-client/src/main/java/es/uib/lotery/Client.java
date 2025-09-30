@@ -36,24 +36,27 @@ public class Client {
     }
 
     public boolean connectToServer() {
-        return connection.connect(new InetSocketAddress(this.DNSAddress.getAddress(), this.DNSAddress.getPort()));
+        return connection.connect(new InetSocketAddress(
+                this.DNSAddress.getAddress(),
+                this.DNSAddress.getPort()
+        ));
     }
 
     public void disconnect() {
         connection.disconnect();
     }
 
-    public boolean DNSConnectionTicket(DNSRequestPacket dnsRequest) {
-        return connection.send(dnsRequest, (response) -> {
-            if(! (response instanceof DNSResponsePacket)) {return;}
+    public void DNSConnectionTicket(DNSRequestPacket dnsRequest) {
+        connection.send(dnsRequest, (response) -> {
+            if (!(response instanceof DNSResponsePacket)) return;
 
             this.DNSAddress = ((DNSResponsePacket) response).getAddress();
         });
     }
 
-    public boolean recieveTicket(SellerRequestPacket requestPacket) {
-        return connection.send(requestPacket, (response) -> {
-            if(!(response instanceof SellerResponsePacket sellerResponsePacket)) return;
+    public void receiveTicket(SellerRequestPacket requestPacket) {
+        connection.send(requestPacket, (response) -> {
+            if (!(response instanceof SellerResponsePacket sellerResponsePacket)) return;
 
             tickets.add(sellerResponsePacket.getTicket());
         });

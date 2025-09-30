@@ -4,25 +4,37 @@ import es.uib.lotery.packet.DNSRequestPacket;
 import es.uib.lotery.packet.SellerRequestPacket;
 
 public class ClientSocket {
-        public static void main(String[] args) {
-            if (args.length < 3) {
-                System.out.println("Uso: java LotteryClient <dnsHost> <dnsPort> <clientName>");
-                return;
-            }
-            String dnsHost = args[0];
-            int dnsPort = Integer.parseInt(args[1]);
-            String clientName = args[2];
+    public static void main(String[] args) {
+        if (args.length < 3) {
+            System.out.println("Uso: java LotteryClient <dnsHost> <dnsPort> <clientName>");
+            return;
+        }
 
-            Client c = new Client(clientName);
-            DNSRequestPacket req = new DNSRequestPacket();
-            if (c.connectToServer(dnsHost, dnsPort)) {
-                c.DNSConnectionTicket(req);
-                c.disconnect();
-            }
+        String dnsHost = args[0];
+        String clientName = args[2];
+        int dnsPort;
+        try {
+            dnsPort = Integer.parseInt(args[1]);
+        }catch (NumberFormatException e) {
+            dnsPort = 8080;
+            System.out.println("Using default dns port: " + dnsPort);
+        }
 
-            SellerRequestPacket buy = new SellerRequestPacket();
-            if(c.connectToServer()) {
-                c.recieveTicket(buy);
-            }
+        new ClientSocket().start(dnsHost, dnsPort, clientName);
+    }
+
+    private void start(String dnsHost, int dnsPort, String clientName) {
+        Client client = new Client(clientName);
+
+        if (client.connectToServer(dnsHost, dnsPort)) {
+            DNSRequestPacket packet = DNSRequestPacket.builder().serverName("server1").build();
+            client.DNSConnectionTicket(packet);
+            client.disconnect();
+        }
+
+        if (client.connectToServer()) {
+            SellerRequestPacket packet = SellerRequestPacket.builder().build();
+            client.receiveTicket(packet);
         }
     }
+}
