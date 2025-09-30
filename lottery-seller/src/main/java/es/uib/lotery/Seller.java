@@ -57,6 +57,14 @@ public class Seller {
         this.connectionServer.stop();
     }
 
+    public void listen(){
+        try{
+            this.connectionServer.listen();
+        } catch (Exception e) {
+            System.out.println("LISTENING ERROR"+e.getMessage());
+        }
+    }
+
     public boolean connectClient() {
         return this.connectionClient.connect(new InetSocketAddress(this.ServerAddress.getAddress(), this.ServerAddress.getPort()));
     }
