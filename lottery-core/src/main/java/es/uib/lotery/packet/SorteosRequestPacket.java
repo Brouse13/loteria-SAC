@@ -1,6 +1,5 @@
 package es.uib.lotery.packet;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,9 +7,9 @@ import lombok.NoArgsConstructor;
 import java.nio.ByteBuffer;
 
 @Getter
-@AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class SellerRequestPacket implements BasePacket {
+public class SorteosRequestPacket implements BasePacket {
     public final byte id = PacketBuilder.SELLER_REQUEST_PACKET_ID;
 
     @Override

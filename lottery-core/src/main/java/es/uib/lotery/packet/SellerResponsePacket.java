@@ -8,13 +8,12 @@ import lombok.NoArgsConstructor;
 
 import java.nio.ByteBuffer;
 
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class SellerResponsePacket implements BasePacket {
-    @Getter
-    public static final byte id = PacketBuilder.SELLER_REQUEST_PACKET_ID;
-    @Getter
+    public final byte id = PacketBuilder.SELLER_REQUEST_PACKET_ID;
     private Ticket ticket;
 
     @Override
