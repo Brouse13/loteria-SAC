@@ -43,6 +43,13 @@
                 <artifactId>jackson-core</artifactId>
                 <version>2.20.0</version>
             </dependency>
+
+            <dependency>
+                <groupId>es.uib</groupId>
+                <artifactId>lottery-core</artifactId>
+                <version>1.0</version>
+                <scope>compile</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

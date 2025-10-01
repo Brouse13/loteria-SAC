@@ -4,7 +4,8 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - SERVER_TYPE=server
+      SERVER_TYPE: "server"
+      JAR_ARGS: ""
     ports:
       - "8080:8080"  # Ajusta el puerto según tu server
 
@@ -13,20 +14,23 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - SERVER_TYPE=client
+      SERVER_TYPE: "client"
+      JAR_ARGS: "localhost 3030 client1"
 
   lottery-seller:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      - SERVER_TYPE=seller
+      SERVER_TYPE: "seller"
+      JAR_ARGS: ""
 
   lottery-dns:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      - SERVER_TYPE=dns
+      SERVER_TYPE: "dns"
+      JAR_ARGS: "3030"
     ports:
-      - "53:53"  # Ajusta si usas DNS real o solo simulado
+      - "3030:3030"  # Ajusta si usas DNS real o solo simulado
