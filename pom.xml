@@ -13,6 +13,7 @@
         <module>lottery-client</module>
         <module>lottery-server</module>
         <module>lottery-seller</module>
+        <module>lottery-dns</module>
     </modules>
 
     <properties>

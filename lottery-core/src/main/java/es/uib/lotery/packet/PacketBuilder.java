@@ -12,6 +12,7 @@ public class PacketBuilder {
     public static final byte SELLER_RESPONSE_PACKET_ID = 0x05;
     public static final byte SORTEOS_REQUEST_PACKET_ID = 0x06;
     public static final byte SORTEOS_RESPONSE_PACKET_ID = 0x07;
+    public static final byte DNS_CONNECT_PACKET_ID = 0x08;
 
 
     public static final PacketBuilder INSTANCE = new PacketBuilder();
@@ -31,6 +32,7 @@ public class PacketBuilder {
             case SELLER_RESPONSE_PACKET_ID -> packet = new SellerResponsePacket();
             case SORTEOS_REQUEST_PACKET_ID -> packet = new SorteosRequestPacket();
             case SORTEOS_RESPONSE_PACKET_ID -> packet = new SorteosResponsePacket();
+            case DNS_CONNECT_PACKET_ID -> packet = new DNSConnectPacket();
         }
 
         // If no matching id for packet return null
