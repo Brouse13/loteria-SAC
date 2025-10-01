@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Random;
@@ -16,68 +17,76 @@ import java.util.Random;
 @Setter
 @AllArgsConstructor
 public class Seller {
-    private final String sellerId;
+    private final String sellerName;
     private final BaseServerConnection connectionServer;
     private final BaseClientConnection connectionClient = new BaseClientConnection();
-    private final PacketHandleRegistry registry;
-    private final InetSocketAddress ServerAddress = new InetSocketAddress("localhost", 8090);
-    private InetSocketAddress DNSAddress;
     private List<Integer> sorteos;
 
-    public Seller(String sellerId) {
-        this.sellerId = sellerId;
-        this.registry = new PacketHandleRegistry();
-        registerHandlers();
+    public Seller(String sellerName) {
+        PacketHandleRegistry registry = new PacketHandleRegistry();
+        this.sellerName = sellerName;
         this.connectionServer = new BaseServerConnection(registry);
+
+        registry.registerHandler(SellerRequestPacket.class, this::requestTicket);
     }
 
-    private void registerHandlers() {
-        // Handler para compras
-        registry.registerHandler(SellerRequestPacket.class, (buy) -> {
-            Random r = new Random();
-            Ticket ticket = Ticket.builder()
-                    .number("T-" + System.nanoTime())
-                    .sorteo(this.sorteos.get(r.nextInt(this.sorteos.size())))
-                    .build();
-
-            // Construimos el paquete de respuesta
-            SellerResponsePacket response = SellerResponsePacket.builder()
-                    .ticket(ticket)
-                    .build();
-
-            return List.of(response);
-        });
-    }
-
-    public boolean connectServer(String host, int port) {
-           return this.connectionServer.start(new InetSocketAddress(host, port));
+    public void start(String host, int port) throws IOException {
+        connectionServer.start(new InetSocketAddress(host, port));
+        connectionServer.listen();
     }
 
     public void disconnectServer() {
         this.connectionServer.stop();
     }
 
-    public void listen(){
-        try{
-            this.connectionServer.listen();
-        } catch (Exception e) {
-            System.out.println("LISTENING ERROR"+e.getMessage());
-        }
-    }
-
-    public boolean connectClient() {
-        return this.connectionClient.connect(new InetSocketAddress(this.ServerAddress.getAddress(), this.ServerAddress.getPort()));
+    public boolean connectClient(String host, int port) {
+        return this.connectionClient.connect(new InetSocketAddress(host, port));
     }
 
     public void disconnectClient() {
         connectionClient.disconnect();
     }
 
-    public boolean requestSorteos(SorteosRequestPacket request){
-        return connectionClient.send(request, (response) -> {
-            if(! (response instanceof SorteosResponsePacket)) {return;}
+    public void connectDNS(String host, int port) {
+        DNSConnectPacket request = DNSConnectPacket.builder()
+                .address(new InetSocketAddress(host, port))
+                .serverName(sellerName)
+                .type(DNSConnectPacket.Type.CONNECT)
+                .build();
 
-            this.sorteos = ((SorteosResponsePacket) response).getSorteos();
+        connectionClient.send(request, null);
+    }
+
+    public void disconnectDNS(String host, int port) {
+        DNSConnectPacket request = DNSConnectPacket.builder()
+                .serverName(sellerName)
+                .type(DNSConnectPacket.Type.DISCONNECT)
+                .address(new InetSocketAddress(host, port))
+                .build();
+
+        connectionClient.send(request, null);
+    }
+
+    public void requestSorteos() {
+        connectionClient.send(new SorteosRequestPacket(), (packet) -> {
+            if (!(packet instanceof SorteosResponsePacket response)) return;
+
+            this.sorteos = response.getSorteos();
         });
+    }
+
+    private List<BasePacket> requestTicket(SellerRequestPacket requestPacket) {
+        Random r = new Random();
+        Ticket ticket = Ticket.builder()
+                .number("T-" + System.nanoTime())
+                .sorteo(this.sorteos.get(r.nextInt(this.sorteos.size())))
+                .build();
+
+        // Construimos el paquete de respuesta
+        SellerResponsePacket response = SellerResponsePacket.builder()
+                .ticket(ticket)
+                .build();
+
+        return List.of(response);
     }
 }
