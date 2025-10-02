@@ -21,9 +21,10 @@ public class PacketBuilder {
 
     public BasePacket buildPacket(ByteBuffer byteBuffer) throws IOException {
         BasePacket packet = null;
+        int id = PacketUtils.getInt(byteBuffer);
 
         // Check the packet depending on its ID
-        switch (PacketUtils.getByte(byteBuffer)) {
+        switch (id) {
             case DNS_REQUEST_PACKET_ID -> packet = new DNSRequestPacket();
             case DNS_RESPONSE_PACKET_ID -> packet = new DNSResponsePacket();
             case DRAW_REQUEST_PACKET_ID -> packet = new DrawRequestPacket();
@@ -36,7 +37,7 @@ public class PacketBuilder {
         }
 
         // If no matching id for packet return null
-        if (packet != null) packet.decode(byteBuffer);
+        if (packet != null) packet = packet.decode(byteBuffer);
         return packet;
     }
 }
