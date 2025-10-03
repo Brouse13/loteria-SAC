@@ -28,10 +28,10 @@ public class Server {
         this.connectionServer = new BaseServerConnection(registry);
 
         registry.registerHandler(SorteosRequestPacket.class, this::getLotteryTickets);
-        registry.registerHandler(SellerRequestPacket.class, this::createTicket);
+        registry.registerHandler(SorteoRequestPacket.class, this::createTicket);
     }
 
-    private List<BasePacket> createTicket(SellerRequestPacket request) {
+    private List<BasePacket> createTicket(SorteoRequestPacket request) {
         return List.of();
     }
 
@@ -52,10 +52,6 @@ public class Server {
         return this.connectionClient.connect(new InetSocketAddress(host, port));
     }
 
-    public void disconnectClient() {
-        connectionClient.disconnect();
-    }
-
     public Ticket sortear(int sorteoId) {
         Random random = new Random();
 
@@ -68,12 +64,6 @@ public class Server {
             if (!(response instanceof DNSServersResponsePacket)) return;
 
             this.sellersAddress = ((DNSServersResponsePacket) response).getServers();
-        });
-    }
-
-    public boolean sendResult(DNSServersRequestPacket request) {
-        return connectionClient.send(request, (response) -> {
-
         });
     }
 

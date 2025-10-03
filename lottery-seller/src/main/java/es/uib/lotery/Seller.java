@@ -2,7 +2,6 @@ package es.uib.lotery;
 
 import es.uib.lotery.connection.BaseClientConnection;
 import es.uib.lotery.connection.BaseServerConnection;
-import es.uib.lotery.entity.Ticket;
 import es.uib.lotery.packet.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,7 +10,7 @@ import lombok.Setter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.*;
 
 @Getter
 @Setter
@@ -27,7 +26,7 @@ public class Seller {
         this.sellerName = sellerName;
         this.connectionServer = new BaseServerConnection(registry);
 
-        registry.registerHandler(SellerRequestPacket.class, this::requestTicket);
+        registry.registerHandler(SorteoRequestPacket.class, this::requestSorteo);
     }
 
     public void start(String host, int port) throws IOException {
@@ -67,26 +66,24 @@ public class Seller {
         connectionClient.send(request, null);
     }
 
-    public void requestSorteos() {
-        connectionClient.send(new SorteosRequestPacket(), (packet) -> {
-            if (!(packet instanceof SorteosResponsePacket response)) return;
+    private List<BasePacket> requestSorteo(SorteoRequestPacket requestPacket) {
+        CompletableFuture<Boolean> hasWin = new CompletableFuture<>();
 
-            this.sorteos = response.getSorteos();
+        connectionClient.send(requestPacket, packet -> {
+            if (!(packet instanceof SorteoResponsePacket)) return;
+
+            boolean win = ((SorteoResponsePacket) packet).isWin();
+            hasWin.complete(win);
         });
-    }
 
-    private List<BasePacket> requestTicket(SellerRequestPacket requestPacket) {
-        Random r = new Random();
-        Ticket ticket = Ticket.builder()
-                .number("T-" + System.nanoTime())
-                .sorteo(this.sorteos.get(r.nextInt(this.sorteos.size())))
-                .build();
+        Boolean result = false;
+        try {
+            result = hasWin.get(5, TimeUnit.SECONDS);
+        }catch (TimeoutException | CancellationException ignore) {
+        }catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
 
-        // Construimos el paquete de respuesta
-        SellerResponsePacket response = SellerResponsePacket.builder()
-                .ticket(ticket)
-                .build();
-
-        return List.of(response);
+        return List.of(SorteoResponsePacket.builder().win(result).build());
     }
 }

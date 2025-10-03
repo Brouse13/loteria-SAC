@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class SellerResponsePacket implements BasePacket {
+public class SorteoResponsePacket implements BasePacket {
     public final byte id = PacketBuilder.SELLER_REQUEST_PACKET_ID;
     private boolean win;
 
@@ -23,7 +23,7 @@ public class SellerResponsePacket implements BasePacket {
 
     @Override
     public BasePacket decode(final ByteBuffer buffer) {
-        return SellerResponsePacket.builder()
+        return SorteoResponsePacket.builder()
                 .win(PacketUtils.getBoolean(buffer))
                 .build();
     }

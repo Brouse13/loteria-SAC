@@ -35,13 +35,13 @@ public class Client {
         });
     }
 
-    public void pedirSorteo(SellerRequestPacket requestPacket) {
+    public void pedirSorteo(SorteoRequestPacket requestPacket) {
         win = false;
 
         connection.send(requestPacket, (packet) -> {
-            if (!(packet instanceof SellerResponsePacket )) return;
+            if (!(packet instanceof SorteoResponsePacket)) return;
 
-            if (((SellerResponsePacket) packet).isWin()) win = true;
+            if (((SorteoResponsePacket) packet).isWin()) win = true;
         });
     }
 

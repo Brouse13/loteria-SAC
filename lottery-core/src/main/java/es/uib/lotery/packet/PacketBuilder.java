@@ -27,8 +27,8 @@ public class PacketBuilder {
         switch (id) {
             case DNS_REQUEST_PACKET_ID -> packet = new DNSRequestPacket();
             case DNS_RESPONSE_PACKET_ID -> packet = new DNSResponsePacket();
-            case SELLER_REQUEST_PACKET_ID -> packet = new SellerRequestPacket();
-            case SELLER_RESPONSE_PACKET_ID -> packet = new SellerResponsePacket();
+            case SELLER_REQUEST_PACKET_ID -> packet = new SorteoRequestPacket();
+            case SELLER_RESPONSE_PACKET_ID -> packet = new SorteoResponsePacket();
             case SORTEOS_REQUEST_PACKET_ID -> packet = new SorteosRequestPacket();
             case SORTEOS_RESPONSE_PACKET_ID -> packet = new SorteosResponsePacket();
             case DNS_CONNECT_PACKET_ID -> packet = new DNSConnectPacket();

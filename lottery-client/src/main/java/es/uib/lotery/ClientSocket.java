@@ -1,7 +1,7 @@
 package es.uib.lotery;
 
 import es.uib.lotery.packet.DNSRequestPacket;
-import es.uib.lotery.packet.SellerRequestPacket;
+import es.uib.lotery.packet.SorteoRequestPacket;
 
 import java.net.InetSocketAddress;
 import java.util.Random;
@@ -36,7 +36,7 @@ public class ClientSocket {
         scheduler.scheduleAtFixedRate(() -> {
             if (client.connectToServer(address.getHostName(), address.getPort())) {
                 int number = random.nextInt(100);
-                client.pedirSorteo(new SellerRequestPacket(number));
+                client.pedirSorteo(new SorteoRequestPacket(number));
 
                 if (client.hasWin()) {
                     System.out.printf("Has ganado con el numero: %d\n", number);
