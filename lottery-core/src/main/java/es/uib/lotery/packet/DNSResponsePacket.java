@@ -19,7 +19,7 @@ public class DNSResponsePacket implements BasePacket {
     @Override
     public void encode(final ByteBuffer buffer) {
         PacketUtils.putByte(buffer, id);
-        PacketUtils.putString(buffer, address.getAddress().getHostAddress());
+        PacketUtils.putString(buffer, address.getHostName());
         PacketUtils.putInt(buffer, address.getPort());
     }
 

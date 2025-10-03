@@ -13,8 +13,9 @@ import static es.uib.lotery.utils.Constants.DNS_HOST;
 import static es.uib.lotery.utils.Constants.DNS_PORT;
 
 public class DNSSocket {
+    private final Random random = new Random();
     private final ServerConnection serverConnection;
-    private final Map<String, Queue<InetSocketAddress>> serversNames = new ConcurrentHashMap<>();
+    private final Map<String, InetSocketAddress> serversNames = new ConcurrentHashMap<>();
 
     public DNSSocket() {
         PacketHandleRegistry registry = new PacketHandleRegistry();
@@ -22,7 +23,6 @@ public class DNSSocket {
 
         registry.registerHandler(DNSRequestPacket.class, this::handleDNS);
         registry.registerHandler(DNSConnectPacket.class, this::handleConnection);
-        registry.registerHandler(DNSServersRequestPacket.class, this::handleServers);
     }
 
     public void start() throws IOException {
@@ -37,46 +37,26 @@ public class DNSSocket {
     private List<BasePacket> handleDNS(DNSRequestPacket packet) {
         DNSResponsePacket.DNSResponsePacketBuilder builder = DNSResponsePacket.builder();
 
-        Queue<InetSocketAddress> addresses = serversNames.get(packet.getServerName());
-        if (addresses == null) return List.of(builder.build());
-
-        // Apply roundRobin policy
-        InetSocketAddress address = addresses.poll();
-        addresses.add(address);
+        InetSocketAddress address = getRandomServer();
+        System.out.println(address);
+        if (address == null) return List.of(builder.build());
 
         return List.of(builder.address(address).build());
-
     }
 
     private List<BasePacket> handleConnection(DNSConnectPacket packet) {
-        serversNames.computeIfPresent(packet.getServerName(), (name, addresses) -> {
-            switch (packet.getType()) {
-                case CONNECT -> addresses.add(packet.getAddress());
-                case DISCONNECT -> addresses.remove(packet.getAddress());
-            }
-            return addresses;
-        });
+        switch (packet.getType()) {
+            case CONNECT ->  serversNames.put(packet.getServerName(), packet.getAddress());
+            case DISCONNECT -> serversNames.remove(packet.getServerName());
+        }
 
         return List.of();
     }
 
-    private List<BasePacket> handleServers(DNSServersRequestPacket packet) {
-        // Suponiendo que quieres todos los servidores de todas las colas
-        List<InetSocketAddress> allServers = new ArrayList<>();
-
-        for (Queue<InetSocketAddress> queue : serversNames.values()) {
-            allServers.addAll(queue);
-        }
-
-        // Construimos un único paquete con todos los servidores
-        DNSServersResponsePacket response = DNSServersResponsePacket.builder()
-                .servers(allServers)
-                .build();
-
-        return List.of(response);
+    private InetSocketAddress getRandomServer() {
+        return serversNames.values().stream()
+                .skip(random.nextInt(serversNames.size()))
+                .findFirst()
+                .orElse(null);
     }
-
-
-
-
 }

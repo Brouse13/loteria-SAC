@@ -12,6 +12,9 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.*;
 
+import static es.uib.lotery.utils.Constants.SERVER_HOST;
+import static es.uib.lotery.utils.Constants.SERVER_PORT;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -69,6 +72,8 @@ public class Seller {
     private List<BasePacket> requestSorteo(SorteoRequestPacket requestPacket) {
         CompletableFuture<Boolean> hasWin = new CompletableFuture<>();
 
+        if (!connectionClient.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT))) return List.of();
+
         connectionClient.send(requestPacket, packet -> {
             if (!(packet instanceof SorteoResponsePacket)) return;
 
@@ -83,6 +88,8 @@ public class Seller {
         }catch (Exception e) {
             System.out.println(e.getMessage());
         }
+
+        connectionClient.disconnect();
 
         return List.of(SorteoResponsePacket.builder().win(result).build());
     }

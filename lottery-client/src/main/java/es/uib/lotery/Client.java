@@ -31,6 +31,8 @@ public class Client {
         connection.send(dnsRequest, (response) -> {
             if (!(response instanceof DNSResponsePacket)) return;
 
+            System.out.println(((DNSResponsePacket) response).getAddress());
+
             address.accept(((DNSResponsePacket) response).getAddress());
         });
     }

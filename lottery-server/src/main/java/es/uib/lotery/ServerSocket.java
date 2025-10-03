@@ -10,7 +10,6 @@ public class ServerSocket {
             server.startServer(SERVER_HOST, SERVER_PORT);
         } catch (Exception e) {
             server.disconnectServer();
-            System.out.println("[SERVER] Error en el hilo: " + e.getMessage());
         }
     }
 }
