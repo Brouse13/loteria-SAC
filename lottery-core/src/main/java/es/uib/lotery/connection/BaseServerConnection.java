@@ -113,6 +113,7 @@ public class BaseServerConnection implements ServerConnection {
         try {
             buffer.clear();
             int bytes = client.read(buffer);
+            buffer.flip();
 
             if (bytes == -1) {
                 System.out.printf("[SERVER] %s close connection\n", client.getRemoteAddress());
