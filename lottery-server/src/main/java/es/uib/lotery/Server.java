@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
 
+import static es.uib.lotery.utils.Constants.RANDOM_NUMBER;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -22,7 +24,9 @@ public class Server {
         PacketHandleRegistry registry = new PacketHandleRegistry();
         this.connectionServer = new BaseServerConnection(registry);
 
-        sorteo = rand.nextInt(100);
+        sorteo = RANDOM_NUMBER.get();
+
+        System.out.println("Server started - " + sorteo);
 
         registry.registerHandler(SorteoRequestPacket.class, this::sortearNumero);
     }
@@ -32,7 +36,9 @@ public class Server {
                 .win(request.getRequestNumber() == sorteo)
                 .build();
 
-        if (build.isWin()) sorteo = rand.nextInt(100);
+        System.out.println(request.getRequestNumber() + " -------------------- " + sorteo);
+
+        if (build.isWin()) sorteo = RANDOM_NUMBER.get();
 
         return List.of(build);
     }

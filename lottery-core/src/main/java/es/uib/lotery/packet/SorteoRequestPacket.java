@@ -27,4 +27,12 @@ public class SorteoRequestPacket implements BasePacket {
                 .requestNumber(PacketUtils.getInt(buffer))
                 .build();
     }
+
+    @Override
+    public String toString() {
+        return "SorteoRequestPacket{" +
+                "id=" + id +
+                ", requestNumber=" + requestNumber +
+                '}';
+    }
 }

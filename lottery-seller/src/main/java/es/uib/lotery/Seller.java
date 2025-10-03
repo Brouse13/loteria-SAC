@@ -79,6 +79,7 @@ public class Seller {
 
             boolean win = ((SorteoResponsePacket) packet).isWin();
             hasWin.complete(win);
+            System.out.println("hasWin: " + ((SorteoResponsePacket) packet).isWin() + "----------" + requestPacket.getRequestNumber());
         });
 
         Boolean result = false;

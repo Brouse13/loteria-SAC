@@ -10,8 +10,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static es.uib.lotery.utils.Constants.DNS_HOST;
-import static es.uib.lotery.utils.Constants.DNS_PORT;
+import static es.uib.lotery.utils.Constants.*;
 
 public class ClientSocket {
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
@@ -35,15 +34,16 @@ public class ClientSocket {
 
         scheduler.scheduleAtFixedRate(() -> {
             if (client.connectToServer(address.getHostName(), address.getPort())) {
-                int number = random.nextInt(100);
-                client.pedirSorteo(new SorteoRequestPacket(number));
+                int number = RANDOM_NUMBER.get();
+                System.out.println(number + "---------------------");
+                client.pedirSorteo(SorteoRequestPacket.builder().requestNumber(number).build());
 
                 if (client.hasWin()) {
-                    System.out.printf("Has ganado con el numero: %d\n", number);
+                    System.out.printf("--------------------Has ganado con el numero: %d\n", number);
                 }
 
                 client.disconnect();
             }
-        },0, random.nextInt(10), TimeUnit.SECONDS);
+        },0, random.nextInt(CLIENT_RETRY_SECONDS), TimeUnit.SECONDS);
     }
 }
