@@ -11,13 +11,13 @@ public class SellerSocket {
         int serverPort = 0, dnsPort = 0;
         try {
             serverPort = Integer.parseInt(args[3]);
-            dnsPort = Integer.parseInt(args[0]);
+            dnsPort = Integer.parseInt(args[1]);
         }catch (NumberFormatException e) {
             System.out.println("Error parsing number: " + e.getMessage());
             System.exit(1);
         }
 
-        String dnsHost = args[1];
+        String dnsHost = args[0];
         String serverHost = args[2];
         String sellerName = args[4];
 
@@ -34,12 +34,14 @@ public class SellerSocket {
         }
 
         // Connect to server
+        /*
         if (seller.connectClient(serverHost, serverPort)) {
             seller.requestSorteos();
             seller.disconnectClient();
         }
+         */
 
-        // Start server
+        // Start server (TODO ESTO NO TIENE QUE SER ESTE HOST Y PUERTO)
         try {
             seller.start(serverHost, serverPort);
         }catch (IOException e) {
