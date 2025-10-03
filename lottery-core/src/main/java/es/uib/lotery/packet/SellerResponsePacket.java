@@ -32,4 +32,12 @@ public class SellerResponsePacket implements BasePacket {
                         .build()
                 ).build();
     }
+
+    @Override
+    public String toString() {
+        return "SellerResponsePacket{" +
+                "id=" + id +
+                ", ticket=" + ticket +
+                '}';
+    }
 }

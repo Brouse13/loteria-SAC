@@ -62,9 +62,7 @@ public class DNSSocket {
         List<InetSocketAddress> allServers = new ArrayList<>();
 
         for (Queue<InetSocketAddress> queue : serversNames.values()) {
-            for (InetSocketAddress addr : queue) {
-                allServers.add(addr);
-            }
+            allServers.addAll(queue);
         }
 
         // Construimos un único paquete con todos los servidores

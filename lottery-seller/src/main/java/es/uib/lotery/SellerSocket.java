@@ -34,16 +34,14 @@ public class SellerSocket {
         }
 
         // Connect to server
-        /*
         if (seller.connectClient(serverHost, serverPort)) {
             seller.requestSorteos();
             seller.disconnectClient();
         }
-         */
 
         // Start server (TODO ESTO NO TIENE QUE SER ESTE HOST Y PUERTO)
         try {
-            seller.start(serverHost, serverPort);
+            seller.start("localhost", 1234);
         }catch (IOException e) {
             seller.disconnectServer();
         }
