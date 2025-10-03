@@ -3,40 +3,47 @@ package es.uib.lotery;
 import es.uib.lotery.packet.DNSRequestPacket;
 import es.uib.lotery.packet.SellerRequestPacket;
 
+import java.net.InetSocketAddress;
 import java.util.Random;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static es.uib.lotery.utils.Constants.DNS_HOST;
 import static es.uib.lotery.utils.Constants.DNS_PORT;
 
 public class ClientSocket {
-    public static void main(String[] args) {
-        if (args.length < 3) {
-            System.out.println("Uso: java LotteryClient <clientName>");
-            return;
-        }
+    private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
-        new ClientSocket().start(args[0]);
+    public static void main(String[] args) {
+        new ClientSocket().start();
     }
 
-    private void start(String clientName) {
-        Client client = new Client(clientName);
+    private void start() {
+        AtomicReference<InetSocketAddress> serverAddress = new AtomicReference<>();
+        Client client = new Client();
 
         if (client.connectToServer(DNS_HOST, DNS_PORT)) {
-            DNSRequestPacket packet = DNSRequestPacket.builder().serverName("server").build();
-            client.DNSConnectionTicket(packet);
+            DNSRequestPacket packet = DNSRequestPacket.builder().serverName("seller").build();
+            client.requestAddress(packet, serverAddress::set);
             client.disconnect();
         }
 
-        while (true) {
-            Random random = new Random();
-            if (1 == random.nextInt(10)) {
-                if (client.connectToServer()) {
-                    SellerRequestPacket packet = SellerRequestPacket.builder().build();
-                    client.receiveTicket(packet);
-                    client.disconnect();
+        final Random random = new Random();
+        final InetSocketAddress address = serverAddress.get();
+
+        scheduler.scheduleAtFixedRate(() -> {
+            if (client.connectToServer(address.getHostName(), address.getPort())) {
+                int number = random.nextInt(100);
+                client.pedirSorteo(new SellerRequestPacket(number));
+
+                if (client.hasWin()) {
+                    System.out.printf("Has ganado con el numero: %d\n", number);
                 }
-                client.listTickets();
+
+                client.disconnect();
             }
-        }
+        },0, random.nextInt(10), TimeUnit.SECONDS);
     }
 }

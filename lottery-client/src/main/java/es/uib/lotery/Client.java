@@ -1,15 +1,12 @@
 package es.uib.lotery;
 
 import es.uib.lotery.connection.BaseClientConnection;
-import es.uib.lotery.entity.Ticket;
 import es.uib.lotery.packet.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Cliente de lotería orientado a objetos.
@@ -18,52 +15,38 @@ import java.util.List;
 @Getter
 @Setter
 public class Client {
-    private final String name;
-    private final List<Ticket> tickets = new ArrayList<>();
     private final BaseClientConnection connection = new BaseClientConnection();
-    private InetSocketAddress DNSAddress;
+    private boolean win = false;
 
-    public Client(String name) {
-        this.name = name;
-    }
-
-    public List<Ticket> getTickets() {
-        return Collections.unmodifiableList(tickets);
-    }
 
     public boolean connectToServer(String host, int port) {
         return connection.connect(new InetSocketAddress(host, port));
-    }
-
-    public boolean connectToServer() {
-        return connection.connect(new InetSocketAddress(
-                this.DNSAddress.getAddress(),
-                this.DNSAddress.getPort()
-        ));
     }
 
     public void disconnect() {
         connection.disconnect();
     }
 
-    public void DNSConnectionTicket(DNSRequestPacket dnsRequest) {
+    public void requestAddress(DNSRequestPacket dnsRequest, Consumer<InetSocketAddress> address) {
         connection.send(dnsRequest, (response) -> {
             if (!(response instanceof DNSResponsePacket)) return;
 
-            this.DNSAddress = ((DNSResponsePacket) response).getAddress();
+            address.accept(((DNSResponsePacket) response).getAddress());
         });
     }
 
-    public void receiveTicket(SellerRequestPacket requestPacket) {
-        connection.send(requestPacket, (response) -> {
-            if (!(response instanceof SellerResponsePacket sellerResponsePacket)) return;
+    public void pedirSorteo(SellerRequestPacket requestPacket) {
+        win = false;
 
-            tickets.add(sellerResponsePacket.getTicket());
+        connection.send(requestPacket, (packet) -> {
+            if (!(packet instanceof SellerResponsePacket )) return;
+
+            if (((SellerResponsePacket) packet).isWin()) win = true;
         });
     }
 
-    public void listTickets() {
-        System.out.println("[CLIENT-OBJ] Boletos de " + name + ": " + tickets);
+    public boolean hasWin() {
+        return win;
     }
 }
 
