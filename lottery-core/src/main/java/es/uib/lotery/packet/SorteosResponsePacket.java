@@ -32,14 +32,16 @@ public class SorteosResponsePacket implements BasePacket {
 
     @Override
     public BasePacket decode(final ByteBuffer buffer) {
-        // Leer el tamaño de la lista
+        // Leer cantidad
         int size = PacketUtils.getInt(buffer);
 
+        // Leer todos los sorteos
         List<Integer> sorteos = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
             sorteos.add(PacketUtils.getInt(buffer));
         }
 
+        // Usando patrón builder como pediste
         return SorteosResponsePacket.builder()
                 .sorteos(sorteos)
                 .build();

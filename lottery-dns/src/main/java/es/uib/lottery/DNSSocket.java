@@ -19,6 +19,7 @@ public class DNSSocket {
 
         registry.registerHandler(DNSRequestPacket.class, this::handleDNS);
         registry.registerHandler(DNSConnectPacket.class, this::handleConnection);
+        registry.registerHandler(DNSServersRequestPacket.class, this::handleServers);
     }
 
     public void start(String host, int port) throws IOException {
@@ -55,4 +56,26 @@ public class DNSSocket {
 
         return List.of();
     }
+
+    private List<BasePacket> handleServers(DNSServersRequestPacket packet) {
+        // Suponiendo que quieres todos los servidores de todas las colas
+        List<InetSocketAddress> allServers = new ArrayList<>();
+
+        for (Queue<InetSocketAddress> queue : serversNames.values()) {
+            for (InetSocketAddress addr : queue) {
+                allServers.add(addr);
+            }
+        }
+
+        // Construimos un único paquete con todos los servidores
+        DNSServersResponsePacket response = DNSServersResponsePacket.builder()
+                .servers(allServers)
+                .build();
+
+        return List.of(response);
+    }
+
+
+
+
 }
