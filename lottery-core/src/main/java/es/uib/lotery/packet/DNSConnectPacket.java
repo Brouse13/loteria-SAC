@@ -20,7 +20,7 @@ public class DNSConnectPacket implements BasePacket {
 
     @Override
     public void encode(ByteBuffer buffer) {
-        PacketUtils.putInt(buffer, id);
+        PacketUtils.putByte(buffer, id);
         PacketUtils.putInt(buffer, type.ordinal());
         PacketUtils.putString(buffer, serverName);
         PacketUtils.putString(buffer, address.getAddress().getHostAddress());

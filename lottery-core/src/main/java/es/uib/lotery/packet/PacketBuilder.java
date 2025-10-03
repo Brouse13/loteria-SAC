@@ -23,7 +23,7 @@ public class PacketBuilder {
 
     public BasePacket buildPacket(ByteBuffer byteBuffer) throws IOException {
         BasePacket packet = null;
-        int id = PacketUtils.getInt(byteBuffer);
+        int id = PacketUtils.getByte(byteBuffer);
 
         // Check the packet depending on its ID
         switch (id) {
