@@ -1,8 +1,6 @@
 package es.uib.lotery;
 
-import es.uib.lotery.connection.BaseClientConnection;
 import es.uib.lotery.connection.BaseServerConnection;
-import es.uib.lotery.entity.Ticket;
 import es.uib.lotery.packet.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,32 +9,26 @@ import lombok.Setter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Setter
 @AllArgsConstructor
 public class Server {
     private final BaseServerConnection connectionServer;
-    private final BaseClientConnection connectionClient = new BaseClientConnection();
-    private Map<Integer, List<Ticket>> sorteos = new ConcurrentHashMap<>();
-    private Set<Integer> raffledSorteos = Collections.synchronizedSet(new HashSet<>());
-    private List<InetSocketAddress> sellersAddress;
+    private int sorteo;
 
     public Server() {
         PacketHandleRegistry registry = new PacketHandleRegistry();
         this.connectionServer = new BaseServerConnection(registry);
 
-        registry.registerHandler(SorteosRequestPacket.class, this::getLotteryTickets);
-        registry.registerHandler(SorteoRequestPacket.class, this::createTicket);
+        registry.registerHandler(SorteoRequestPacket.class, this::sortearNumero);
     }
 
-    private List<BasePacket> createTicket(SorteoRequestPacket request) {
-        return List.of();
-    }
-
-    private List<BasePacket> getLotteryTickets(SorteosRequestPacket request) {
-        return List.of(new SorteosResponsePacket(sorteos.keySet().stream().toList()));
+    private List<BasePacket> sortearNumero(SorteoRequestPacket request) {
+        return List.of(SorteoResponsePacket.builder()
+                .win(request.getRequestNumber() == sorteo)
+                .build()
+        );
     }
 
     public void startServer(String host, int port) throws IOException {
@@ -46,28 +38,5 @@ public class Server {
 
     public void disconnectServer() {
         this.connectionServer.stop();
-    }
-
-    public boolean connectClient(String host, int port) {
-        return this.connectionClient.connect(new InetSocketAddress(host, port));
-    }
-
-    public Ticket sortear(int sorteoId) {
-        Random random = new Random();
-
-        List<Ticket> tickets = sorteos.get(sorteoId);
-        return tickets.get(random.nextInt(tickets.size()));
-    }
-
-    public void getSellers(DNSServersRequestPacket request) {
-        connectionClient.send(request, (response) -> {
-            if (!(response instanceof DNSServersResponsePacket)) return;
-
-            this.sellersAddress = ((DNSServersResponsePacket) response).getServers();
-        });
-    }
-
-    public void crearSorteo() {
-        this.sorteos.put((int) System.nanoTime(), new ArrayList<>());
     }
 }
