@@ -14,6 +14,7 @@ import java.util.*;
 @Setter
 @AllArgsConstructor
 public class Server {
+    private Random rand = new Random();
     private final BaseServerConnection connectionServer;
     private int sorteo;
 
@@ -21,14 +22,19 @@ public class Server {
         PacketHandleRegistry registry = new PacketHandleRegistry();
         this.connectionServer = new BaseServerConnection(registry);
 
+        sorteo = rand.nextInt(100);
+
         registry.registerHandler(SorteoRequestPacket.class, this::sortearNumero);
     }
 
     private List<BasePacket> sortearNumero(SorteoRequestPacket request) {
-        return List.of(SorteoResponsePacket.builder()
+        SorteoResponsePacket build = SorteoResponsePacket.builder()
                 .win(request.getRequestNumber() == sorteo)
-                .build()
-        );
+                .build();
+
+        if (build.isWin()) sorteo = rand.nextInt(100);
+
+        return List.of(build);
     }
 
     public void startServer(String host, int port) throws IOException {
