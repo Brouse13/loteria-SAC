@@ -1,9 +1,6 @@
 package es.uib.lotery.packet;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -15,7 +12,7 @@ import java.nio.ByteBuffer;
 public class DNSConnectPacket implements BasePacket {
     public enum Type { CONNECT, DISCONNECT }
 
-    public final byte id = PacketBuilder.DNS_REQUEST_PACKET_ID;
+    public final byte id = PacketBuilder.DNS_CONNECT_PACKET_ID;
     private Type type;
     private String serverName;
     private InetSocketAddress address;
