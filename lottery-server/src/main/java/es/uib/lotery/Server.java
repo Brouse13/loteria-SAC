@@ -10,9 +10,8 @@ import lombok.Setter;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 @Setter
@@ -20,8 +19,8 @@ import java.util.Random;
 public class Server {
     private final BaseServerConnection connectionServer;
     private final BaseClientConnection connectionClient = new BaseClientConnection();
-    private List<Integer> sorteos = new ArrayList<>();
-    private List<Ticket> tickets = new ArrayList<>();
+    private Map<Integer, List<Ticket>> sorteos = new ConcurrentHashMap<>();
+    private Set<Integer> raffledSorteos = Collections.synchronizedSet(new HashSet<>());
     private List<InetSocketAddress> sellersAddress;
 
     public Server() {
@@ -29,10 +28,15 @@ public class Server {
         this.connectionServer = new BaseServerConnection(registry);
 
         registry.registerHandler(SorteosRequestPacket.class, this::getLotteryTickets);
+        registry.registerHandler(SellerRequestPacket.class, this::createTicket);
     }
 
-    private List<BasePacket> getLotteryTickets(SorteosRequestPacket sorteosRequestPacket) {
-        return List.of(new SorteosResponsePacket(sorteos));
+    private List<BasePacket> createTicket(SellerRequestPacket request) {
+        return List.of();
+    }
+
+    private List<BasePacket> getLotteryTickets(SorteosRequestPacket request) {
+        return List.of(new SorteosResponsePacket(sorteos.keySet().stream().toList()));
     }
 
     public void startServer(String host, int port) throws IOException {
@@ -52,28 +56,16 @@ public class Server {
         connectionClient.disconnect();
     }
 
-    public Ticket sortear() {
+    public Ticket sortear(int sorteoId) {
         Random random = new Random();
-        int sorteo = this.sorteos.get(random.nextInt(this.sorteos.size()));
 
-        List<Ticket> sorteoTickets = null;
-        for (int i = 0; i < this.tickets.size(); i++) {
-            Ticket ticket = this.tickets.get(i);
-            if (ticket.getSorteo() == sorteo) {
-                sorteoTickets.add(ticket);
-                this.tickets.remove(i);
-                i--;
-            }
-        }
-        this.sorteos.remove(sorteo);
-        return sorteoTickets.get(random.nextInt(sorteoTickets.size()));
+        List<Ticket> tickets = sorteos.get(sorteoId);
+        return tickets.get(random.nextInt(tickets.size()));
     }
 
-    public boolean getSellers(DNSServersRequestPacket request) {
-        return connectionClient.send(request, (response) -> {
-            if (!(response instanceof DNSServersResponsePacket)) {
-                return;
-            }
+    public void getSellers(DNSServersRequestPacket request) {
+        connectionClient.send(request, (response) -> {
+            if (!(response instanceof DNSServersResponsePacket)) return;
 
             this.sellersAddress = ((DNSServersResponsePacket) response).getServers();
         });
@@ -86,16 +78,6 @@ public class Server {
     }
 
     public void crearSorteo() {
-        this.sorteos.add((int) System.nanoTime());
-    }
-
-    public boolean requestSorteos(SorteosRequestPacket request) {
-        return connectionClient.send(request, (response) -> {
-            if (!(response instanceof SorteosResponsePacket)) {
-                return;
-            }
-
-            this.sorteos = ((SorteosResponsePacket) response).getSorteos();
-        });
+        this.sorteos.put((int) System.nanoTime(), new ArrayList<>());
     }
 }

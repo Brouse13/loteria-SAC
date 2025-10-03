@@ -7,31 +7,23 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Random;
 
+import static es.uib.lotery.utils.Constants.*;
+
 public class ServerSocket {
     public static void main(String[] args) {
         if (args.length < 2) {
-            System.out.println("Usage: java ServerSocket <dnsHost> <dnsPort>");
+            System.out.println("Usage: java ServerSocket");
             return;
-        }
-
-        String dnsHost = args[0];
-        int dnsPort;
-        try {
-            dnsPort = Integer.parseInt(args[1]);
-        }catch (NumberFormatException e){
-            dnsPort = 8080;
-            System.out.println("Using default port 8080");
         }
 
         Server server = new Server();
 
         Thread serverThread = new Thread(() -> {
             try {
-                server.startServer("localhost", 1234);
+                server.startServer(SERVER_HOST, SERVER_PORT);
             } catch (Exception e) {
                 server.disconnectServer();
                 System.out.println("[SERVER] Error en el hilo: " + e.getMessage());
-                e.printStackTrace();
             }
         });
 
@@ -39,13 +31,13 @@ public class ServerSocket {
         serverThread.start();
 
         DNSServersRequestPacket packet = new DNSServersRequestPacket();
-        if (server.connectClient(dnsHost, dnsPort)) {
+        if (server.connectClient(DNS_HOST, DNS_PORT)) {
             Random rand = new Random();
 
             while (true) {
                 if (1 == rand.nextInt(10)) {
                     server.getSellers(packet);
-                    Ticket ticket = server.sortear();
+                    Ticket ticket = server.sortear(1);
 
                     List<InetSocketAddress> sellers = server.getSellersAddress();
 

@@ -2,54 +2,52 @@ package es.uib.lotery;
 
 import java.io.IOException;
 
+import static es.uib.lotery.utils.Constants.*;
+
 public class SellerSocket {
     public static void main(String[] args) {
         if (args.length < 5) {
-            System.out.println("Uso: java LotteryClient <dnsHost> <dnsPort> <serverHost> <serverPort> <sellerName>");
+            System.out.println("Uso: java LotteryClient <sellerHost> <sellerPort> <sellerName>");
             return;
         }
-        int serverPort = 0, dnsPort = 0;
+        int sellerPort = 0;
         try {
-            serverPort = Integer.parseInt(args[3]);
-            dnsPort = Integer.parseInt(args[1]);
+            sellerPort = Integer.parseInt(args[1]);
         }catch (NumberFormatException e) {
             System.out.println("Error parsing number: " + e.getMessage());
             System.exit(1);
         }
 
-        String dnsHost = args[0];
-        String serverHost = args[2];
-        String sellerName = args[4];
+        String sellerHost = args[0];
+        String sellerName = args[2];
 
-        new SellerSocket().start(dnsHost, dnsPort, serverHost, serverPort, sellerName);
+        new SellerSocket().start(sellerHost, sellerPort, sellerName);
     }
 
-    private void start(String dnsHost, int dnsPort, String serverHost, int serverPort, String sellerName) {
+    private void start(String sellerHost, int sellerPort, String sellerName) {
         Seller seller = new Seller(sellerName);
 
         // Connect DNS packet
-        if (seller.connectClient(dnsHost, dnsPort)) {
-            seller.connectDNS(serverHost, serverPort);
+        if (seller.connectClient(DNS_HOST, DNS_PORT)) {
+            seller.connectDNS(sellerHost, sellerPort);
             seller.disconnectClient();
         }
 
         // Connect to server
-        if (seller.connectClient(serverHost, serverPort)) {
+        if (seller.connectClient(SERVER_HOST, SERVER_PORT)) {
             seller.requestSorteos();
             seller.disconnectClient();
         }
 
-        // Start server (TODO ESTO NO TIENE QUE SER ESTE HOST Y PUERTO)
         try {
-            seller.start("localhost", 1234);
+            seller.start(sellerHost, sellerPort);
         }catch (IOException e) {
             seller.disconnectServer();
-        }
-
-        // Disconnect DNS packet
-        if (seller.connectClient(dnsHost, dnsPort)) {
-            seller.disconnectDNS(serverHost, serverPort);
-            seller.disconnectClient();
+        } finally {
+            if (seller.connectClient(DNS_HOST, DNS_PORT)) {
+                seller.disconnectDNS(sellerHost, sellerPort);
+                seller.disconnectClient();
+            }
         }
     }
 }

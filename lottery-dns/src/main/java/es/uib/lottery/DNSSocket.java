@@ -9,6 +9,9 @@ import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import static es.uib.lotery.utils.Constants.DNS_HOST;
+import static es.uib.lotery.utils.Constants.DNS_PORT;
+
 public class DNSSocket {
     private final ServerConnection serverConnection;
     private final Map<String, Queue<InetSocketAddress>> serversNames = new ConcurrentHashMap<>();
@@ -22,8 +25,8 @@ public class DNSSocket {
         registry.registerHandler(DNSServersRequestPacket.class, this::handleServers);
     }
 
-    public void start(String host, int port) throws IOException {
-        serverConnection.start(new InetSocketAddress(host, port));
+    public void start() throws IOException {
+        serverConnection.start(new InetSocketAddress(DNS_HOST, DNS_PORT));
         serverConnection.listen();
     }
 
