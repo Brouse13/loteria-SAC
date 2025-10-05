@@ -1,0 +1,5 @@
+dnsHost: "192.168.1.174"
+dnsPort: 8080
+serverHost: "192.168.1.174"
+serverPort: 3030
+retryInSeconds: 3
