@@ -8,8 +8,10 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public class BaseClientConnection implements ClientConnection {
+    private static final Logger logger = Logger.getLogger(BaseClientConnection.class.getName());
     private SocketChannel client;
 
     private ByteBuffer buffer;
@@ -17,17 +19,17 @@ public class BaseClientConnection implements ClientConnection {
     @Override
     public boolean connect(InetSocketAddress address) {
         try {
-            System.out.printf("[CLIENT] Trying to connect to %s:%d\n", address.getHostName(), address.getPort());
+            logger.config("[CLIENT] Trying to connect to %s:%d ".formatted(address.getHostName(), address.getPort()));
 
             client = SocketChannel.open(address);
             buffer = ByteBuffer.allocate(256);
 
         } catch (IOException e) {
-            System.out.printf("[CLIENT] Error: %s\n", e.getMessage());
+            logger.warning("[CLIENT] Error: %s".formatted(e.getMessage()));
             return false;
         }
 
-        System.out.println("[CLIENT] Connection successfully established");
+        logger.config("[CLIENT] Connection successfully established");
         return true;
     }
 
@@ -35,15 +37,15 @@ public class BaseClientConnection implements ClientConnection {
     public void disconnect() {
         try {
             if (client != null && client.isOpen()) {
-                System.out.println("[CLIENT] Closing connection");
+                logger.config("[CLIENT] Closing connection...");
                 client.close();
             }
 
             buffer = null;
-            System.out.println("[CLIENT] Connection closed");
+            logger.config("[CLIENT] Connection closed");
 
         } catch (IOException e) {
-            System.out.printf("[CLIENT] Error: %s\n", e.getMessage());
+            logger.warning("[CLIENT] Error: %s".formatted(e.getMessage()));
         }
     }
 
@@ -56,8 +58,7 @@ public class BaseClientConnection implements ClientConnection {
 
             int bytes = client.write(buffer);
 
-            System.out.printf("[CLIENT] Packet 0x%04X sent with %d bytes\n",
-                    packet.getId(), bytes);
+            logger.config("[CLIENT] Packet 0x%04X sent with %d bytes".formatted(packet.hashCode(), bytes));
 
             // No callback provided
             if (responseCallback == null) { return true; }
@@ -65,7 +66,7 @@ public class BaseClientConnection implements ClientConnection {
             responseCallback.accept(getPacket());
 
         } catch (IOException e) {
-            System.out.printf("[CLIENT] Error: %s\n", e.getMessage());
+            logger.warning("[CLIENT] Error: %s".formatted(e.getMessage()));
             return false;
         }
 
@@ -81,13 +82,12 @@ public class BaseClientConnection implements ClientConnection {
             // Serialize packet
             BasePacket basePacket = PacketBuilder.INSTANCE.buildPacket(buffer);
 
-            System.out.printf("[CLIENT] Packet 0x%04X received %d bytes\n",
-                    basePacket.getId(), read);
+            logger.config("[CLIENT] Packet 0x%04X received %d bytes".formatted(basePacket.hashCode(), read));
 
             return basePacket;
 
         } catch (IOException e) {
-            System.out.printf("[CLIENT] Error: %s\n", e.getMessage());
+            logger.warning("[CLIENT] Error: %s".formatted(e.getMessage()));
         }
 
         return null;

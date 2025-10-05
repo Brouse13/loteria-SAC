@@ -7,15 +7,20 @@ import java.util.function.Supplier;
 
 @UtilityClass
 public class Constants {
+
+    static {
+        configuration = YamlLoader.load("configuration.yaml", Configuration.class);
+    }
     private final Random rand = new Random();
 
-    public static final String DNS_HOST = "192.168.1.174";
-    public static final int DNS_PORT = 8080;
+    private static final Configuration configuration;
+    public static final String DNS_HOST = configuration.getDnsHost();
+    public static final int DNS_PORT = configuration.getDnsPort();
 
-    public static final String SERVER_HOST = "192.168.1.174";
-    public static final int SERVER_PORT = 3030;
+    public static final String SERVER_HOST = configuration.getServerHost();
+    public static final int SERVER_PORT = configuration.getServerPort();
 
-    public static final int CLIENT_RETRY_SECONDS = 3;
+    public static final int CLIENT_RETRY_SECONDS = configuration.getRetryInSeconds();
 
-    public static Supplier<Integer> RANDOM_NUMBER = () -> rand.nextInt(10) + 1;
+    public static Supplier<Integer> RANDOM_NUMBER = () -> rand.nextInt(configuration.getRandomSize()) + 1;
 }

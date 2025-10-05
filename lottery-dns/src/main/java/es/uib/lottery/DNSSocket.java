@@ -38,7 +38,6 @@ public class DNSSocket {
         DNSResponsePacket.DNSResponsePacketBuilder builder = DNSResponsePacket.builder();
 
         InetSocketAddress address = getRandomServer();
-        System.out.println(address);
         if (address == null) return List.of(builder.build());
 
         return List.of(builder.address(address).build());

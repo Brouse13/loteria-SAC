@@ -9,10 +9,12 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.logging.Logger;
 
 import static es.uib.lotery.utils.Constants.*;
 
 public class ClientSocket {
+    private static final Logger logger = Logger.getLogger(ClientSocket.class.getName());
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     public static void main(String[] args) {
@@ -24,7 +26,7 @@ public class ClientSocket {
         Client client = new Client();
 
         if (client.connectToServer(DNS_HOST, DNS_PORT)) {
-            DNSRequestPacket packet = DNSRequestPacket.builder().serverName("seller").build();
+            DNSRequestPacket packet = new DNSRequestPacket();
             client.requestAddress(packet, serverAddress::set);
             client.disconnect();
         }
@@ -35,12 +37,9 @@ public class ClientSocket {
         scheduler.scheduleAtFixedRate(() -> {
             if (client.connectToServer(address.getHostName(), address.getPort())) {
                 int number = RANDOM_NUMBER.get();
-                System.out.println(number + "---------------------");
                 client.pedirSorteo(SorteoRequestPacket.builder().requestNumber(number).build());
 
-                if (client.hasWin()) {
-                    System.out.printf("--------------------Has ganado con el numero: %d\n", number);
-                }
+                if (client.hasWin()) logger.config("Has ganado con el numero: %d".formatted(number));
 
                 client.disconnect();
             }
