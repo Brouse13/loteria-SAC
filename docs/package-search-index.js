@@ -1,0 +1,1 @@
+packageSearchIndex = [{"l":"All Packages","u":"allpackages-index.html"},{"l":"es.uib.lotery"},{"l":"es.uib.lotery.connection"},{"l":"es.uib.lotery.packet"},{"l":"es.uib.lotery.utils"}];updateSearchResults();
