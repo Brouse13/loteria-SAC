@@ -5,12 +5,14 @@ import org.yaml.snakeyaml.Yaml;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 public class YamlLoader {
+    private static final Logger logger = Logger.getLogger(YamlLoader.class.getName());
     public static <T> T load(String fileName, Class<T> clazz) {
         Yaml yaml = new Yaml();
 
-        System.out.printf("Loading %s...\n", fileName);
+        logger.config("Loading file %s...".formatted(fileName));
 
         try {
             File file = new File(fileName);
@@ -18,11 +20,12 @@ public class YamlLoader {
                     new FileInputStream(file) :
                     YamlLoader.class.getClassLoader().getResourceAsStream(fileName);
 
-            if (input == null) throw new RuntimeException("Cannot find config file: " + fileName);
+            if (input == null) logger.warning("Cannot find config file %s".formatted(fileName));
 
             return yaml.loadAs(input, clazz);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to load config: " + fileName, e);
+            logger.warning("Failed to load config: %s - %s".formatted(e.getMessage(), e.getMessage()));
+            return null;
         }
     }
 }

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.logging.Logger;
 
 import static es.uib.lotery.utils.Constants.SERVER_HOST;
 import static es.uib.lotery.utils.Constants.SERVER_PORT;
@@ -19,10 +20,11 @@ import static es.uib.lotery.utils.Constants.SERVER_PORT;
 @Setter
 @AllArgsConstructor
 public class Seller {
+    private static final Logger logger = Logger.getLogger(Seller.class.getName());
+
     private final String sellerName;
     private final BaseServerConnection connectionServer;
     private final BaseClientConnection connectionClient = new BaseClientConnection();
-    private List<Integer> sorteos;
 
     public Seller(String sellerName) {
         PacketHandleRegistry registry = new PacketHandleRegistry();
@@ -74,20 +76,22 @@ public class Seller {
 
         if (!connectionClient.connect(new InetSocketAddress(SERVER_HOST, SERVER_PORT))) return List.of();
 
-        connectionClient.send(requestPacket, packet -> {
-            if (!(packet instanceof SorteoResponsePacket)) return;
+        connectionClient.send(requestPacket, response -> {
+            if (!(response instanceof SorteoResponsePacket packet)) return;
 
-            boolean win = ((SorteoResponsePacket) packet).isWin();
+            boolean win = packet.isWin();
             hasWin.complete(win);
-            System.out.println("hasWin: " + ((SorteoResponsePacket) packet).isWin() + "----------" + requestPacket.getRequestNumber());
+
+            logger.config("HasWin - %b with number - %d".formatted(packet.isWin(), requestPacket.getRequestNumber()));
         });
 
         Boolean result = false;
         try {
             result = hasWin.get(5, TimeUnit.SECONDS);
         }catch (TimeoutException | CancellationException ignore) {
+            // If this reaches it means that the server is busy, so we response as failed
         }catch (Exception e) {
-            System.out.println(e.getMessage());
+            logger.warning(e.getMessage());
         }
 
         connectionClient.disconnect();

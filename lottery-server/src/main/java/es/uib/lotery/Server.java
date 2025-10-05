@@ -9,6 +9,7 @@ import lombok.Setter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.logging.Logger;
 
 import static es.uib.lotery.utils.Constants.RANDOM_NUMBER;
 
@@ -16,6 +17,8 @@ import static es.uib.lotery.utils.Constants.RANDOM_NUMBER;
 @Setter
 @AllArgsConstructor
 public class Server {
+    public static final Logger logger = Logger.getLogger(Server.class.getName());
+
     private Random rand = new Random();
     private final BaseServerConnection connectionServer;
     private int sorteo;
@@ -26,7 +29,8 @@ public class Server {
 
         sorteo = RANDOM_NUMBER.get();
 
-        System.out.println("Server started - " + sorteo);
+        logger.info("Server started");
+        logger.config("Sorteo - " + sorteo);
 
         registry.registerHandler(SorteoRequestPacket.class, this::sortearNumero);
     }
@@ -36,7 +40,7 @@ public class Server {
                 .win(request.getRequestNumber() == sorteo)
                 .build();
 
-        System.out.println(request.getRequestNumber() + " -------------------- " + sorteo);
+        logger.config("Numero sorteado %d - (%d)".formatted(request.getRequestNumber(), sorteo));
 
         if (build.isWin()) sorteo = RANDOM_NUMBER.get();
 

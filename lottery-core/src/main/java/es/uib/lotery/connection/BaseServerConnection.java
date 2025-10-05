@@ -14,8 +14,10 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class BaseServerConnection implements ServerConnection {
+    private static final Logger logger = Logger.getLogger(BaseServerConnection.class.getName());
     private ServerSocketChannel serverSocketChannel;
     private final PacketHandleRegistry handleRegistry;
     private Selector selector;
@@ -39,12 +41,12 @@ public class BaseServerConnection implements ServerConnection {
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
         } catch (IOException e) {
-            System.out.printf("[SERVER] Error: %s\n", e.getMessage());
+            logger.warning("[SERVER] Error: %s".formatted( e.getMessage()));
             return false;
         }
 
         // Conexión exitosa
-        System.out.printf("[SERVER] Starting server on %s:%d...\n", address.getHostName(), address.getPort());
+        logger.config("[SERVER] Starting server on %s:%d...".formatted(address.getHostName(), address.getPort()));
         return true;
     }
 
@@ -53,23 +55,23 @@ public class BaseServerConnection implements ServerConnection {
         try {
             // Cierra el canal del servidor si está abierto
             if (serverSocketChannel != null && serverSocketChannel.isOpen()) {
-                System.out.println("[SERVER] Closing server");
+                logger.config("[SERVER] Closing server");
                 serverSocketChannel.close();
             }
 
             // Cierra el selector si está abierto
             if (selector != null && selector.isOpen()) {
-                System.out.println("[SERVER] Closing selector");
+                logger.config("[SERVER] Selector closed");
                 selector.close();
             }
 
             // Limpia el buffer
             buffer = null;
 
-            System.out.println("[SERVER] Server closed");
+            logger.config("[SERVER] Server closed");
 
         } catch (IOException e) {
-            System.out.printf("[SERVER] Error: %s\n", e.getMessage());
+            logger.warning("[SERVER] Error: %s".formatted(e.getMessage()));
         }
     }
 
@@ -104,7 +106,7 @@ public class BaseServerConnection implements ServerConnection {
         client.configureBlocking(false);
         client.register(selector, SelectionKey.OP_READ);
 
-        System.out.printf("[SERVER] %s connected\n", client.getRemoteAddress());
+        logger.config("[SERVER] %s connected".formatted(client.getRemoteAddress()));
     }
 
     private void reply(SelectionKey key) {
@@ -116,7 +118,7 @@ public class BaseServerConnection implements ServerConnection {
             buffer.flip();
 
             if (bytes == -1) {
-                System.out.printf("[SERVER] %s close connection\n", client.getRemoteAddress());
+                logger.config("[SERVER] %s close connection".formatted(client.getRemoteAddress()));
                 client.close();
                 return;
             }
@@ -124,7 +126,7 @@ public class BaseServerConnection implements ServerConnection {
             if (bytes == 0) return;
 
             BasePacket packet = PacketBuilder.INSTANCE.buildPacket(buffer);
-            System.out.printf("[SERVER] <-- %s (%s)\n", client.getRemoteAddress(), packet);
+            logger.config("[SERVER] <-- %s (%s)".formatted(client.getRemoteAddress(), packet));
 
             List<BasePacket> responses = handleRegistry.handlePacket(packet);
 
@@ -139,6 +141,7 @@ public class BaseServerConnection implements ServerConnection {
                 client.write(buffer);
             }
         } catch (IOException e) {
+            logger.warning("[SERVER] Error: %s".formatted(e.getMessage()));
             this.stop();
         }
     }

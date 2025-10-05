@@ -18,7 +18,6 @@ public class Client {
     private final BaseClientConnection connection = new BaseClientConnection();
     private boolean win = false;
 
-
     public boolean connectToServer(String host, int port) {
         return connection.connect(new InetSocketAddress(host, port));
     }
@@ -30,8 +29,6 @@ public class Client {
     public void requestAddress(DNSRequestPacket dnsRequest, Consumer<InetSocketAddress> address) {
         connection.send(dnsRequest, (response) -> {
             if (!(response instanceof DNSResponsePacket)) return;
-
-            System.out.println(((DNSResponsePacket) response).getAddress());
 
             address.accept(((DNSResponsePacket) response).getAddress());
         });
