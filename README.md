@@ -69,3 +69,5 @@ To build the Docker image from the root of the project:
 ## 📝 Versions
 ### **1.0.0**
 - Created first working version of the project
+### **1.0.1**
+- Fixed DNS startup
