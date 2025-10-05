@@ -6,7 +6,7 @@
     <parent>
         <groupId>es.uib</groupId>
         <artifactId>lotery</artifactId>
-        <version>1.0</version>
+        <version>1.0.1</version>
     </parent>
 
     <artifactId>lottery-core</artifactId>
