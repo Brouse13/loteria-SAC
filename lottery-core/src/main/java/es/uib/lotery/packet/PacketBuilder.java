@@ -6,13 +6,9 @@ import java.nio.ByteBuffer;
 public class PacketBuilder {
     public static final byte DNS_REQUEST_PACKET_ID = 0x00;
     public static final byte DNS_RESPONSE_PACKET_ID = 0x01;
-    public static final byte SELLER_REQUEST_PACKET_ID = 0x02;
-    public static final byte SELLER_RESPONSE_PACKET_ID = 0x03;
-    public static final byte SORTEOS_REQUEST_PACKET_ID = 0x04;
-    public static final byte SORTEOS_RESPONSE_PACKET_ID = 0x05;
-    public static final byte DNS_CONNECT_PACKET_ID = 0x06;
-    public static final byte DNS_SERVERS_REQUEST_PACKET_ID = 0x07;
-    public static final byte DNS_SERVERS_RESPONSE_PACKET_ID = 0x08;
+    public static final byte SORTEO_REQUEST_PACKET_ID = 0x02;
+    public static final byte SORTEO_RESPONSE_PACKET_ID = 0x03;
+    public static final byte DNS_CONNECT_PACKET_ID = 0x04;
 
 
     public static final PacketBuilder INSTANCE = new PacketBuilder();
@@ -27,13 +23,9 @@ public class PacketBuilder {
         switch (id) {
             case DNS_REQUEST_PACKET_ID -> packet = new DNSRequestPacket();
             case DNS_RESPONSE_PACKET_ID -> packet = new DNSResponsePacket();
-            case SELLER_REQUEST_PACKET_ID -> packet = new SorteoRequestPacket();
-            case SELLER_RESPONSE_PACKET_ID -> packet = new SorteoResponsePacket();
-            case SORTEOS_REQUEST_PACKET_ID -> packet = new SorteosRequestPacket();
-            case SORTEOS_RESPONSE_PACKET_ID -> packet = new SorteosResponsePacket();
             case DNS_CONNECT_PACKET_ID -> packet = new DNSConnectPacket();
-            case DNS_SERVERS_REQUEST_PACKET_ID -> packet = new DNSServersRequestPacket();
-            case DNS_SERVERS_RESPONSE_PACKET_ID -> packet = new DNSServersResponsePacket();
+            case SORTEO_REQUEST_PACKET_ID -> packet = new SorteoRequestPacket();
+            case SORTEO_RESPONSE_PACKET_ID -> packet = new SorteoResponsePacket();
         }
 
         // If no matching id for packet return null

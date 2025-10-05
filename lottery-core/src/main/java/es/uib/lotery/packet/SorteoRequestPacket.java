@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 @NoArgsConstructor
 @Builder
 public class SorteoRequestPacket implements BasePacket {
-    public final byte id = PacketBuilder.SELLER_REQUEST_PACKET_ID;
+    public final byte id = PacketBuilder.SORTEO_REQUEST_PACKET_ID;
     private int requestNumber;
 
     @Override
