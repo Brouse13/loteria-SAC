@@ -22,5 +22,5 @@ public class Constants {
 
     public static final int CLIENT_RETRY_SECONDS = configuration.getRetryInSeconds();
 
-    public static Supplier<Integer> RANDOM_NUMBER = () -> rand.nextInt(10) + 1;
+    public static Supplier<Integer> RANDOM_NUMBER = () -> rand.nextInt(configuration.getRandomSize()) + 1;
 }

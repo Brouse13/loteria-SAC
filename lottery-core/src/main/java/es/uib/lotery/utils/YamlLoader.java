@@ -22,9 +22,11 @@ public class YamlLoader {
 
             if (input == null) logger.warning("Cannot find config file %s".formatted(fileName));
 
+
             return yaml.loadAs(input, clazz);
         } catch (Exception e) {
             logger.warning("Failed to load config: %s - %s".formatted(e.getMessage(), e.getMessage()));
+            System.exit(0);
             return null;
         }
     }

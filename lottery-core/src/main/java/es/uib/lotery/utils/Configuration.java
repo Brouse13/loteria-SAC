@@ -9,4 +9,5 @@ public class Configuration {
     private String serverHost;
     private int serverPort;
     private int retryInSeconds;
+    private int randomSize;
 }
