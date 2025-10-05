@@ -10,12 +10,45 @@ import java.nio.channels.SocketChannel;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
+/**
+ * The {@code BaseClientConnection} class provides a low-level client-side
+ * socket connection for sending and receiving {@link BasePacket} objects.
+ * <p>
+ * This class implements {@link ClientConnection} and manages a non-blocking
+ * {@link SocketChannel}, encoding packets into a {@link ByteBuffer} for transmission.
+ * </p>
+ *
+ * <p>Key responsibilities:</p>
+ * <ul>
+ *     <li>Establish a TCP connection to a given server address.</li>
+ *     <li>Send serialized {@link BasePacket} objects.</li>
+ *     <li>Receive responses from the server and optionally handle them via a callback.</li>
+ *     <li>Gracefully disconnect and release resources.</li>
+ * </ul>
+ *
+ * <p>Logging is used extensively to track connection and packet events.</p>
+ *
+ * @see ClientConnection
+ * @see BasePacket
+ * @see PacketBuilder
+ */
 public class BaseClientConnection implements ClientConnection {
+
+    /** Logger for client events and error reporting. */
     private static final Logger logger = Logger.getLogger(BaseClientConnection.class.getName());
+
+    /** The underlying socket channel for communication. */
     private SocketChannel client;
 
+    /** Buffer used for encoding and decoding packets. */
     private ByteBuffer buffer;
 
+    /**
+     * Connects to the specified server address via a {@link SocketChannel}.
+     *
+     * @param address the server address to connect to
+     * @return {@code true} if the connection is successfully established, {@code false} otherwise
+     */
     @Override
     public boolean connect(InetSocketAddress address) {
         try {
@@ -33,6 +66,10 @@ public class BaseClientConnection implements ClientConnection {
         return true;
     }
 
+    /**
+     * Disconnects from the server and releases the {@link SocketChannel} and buffer.
+     * Logs both normal closure and any errors encountered.
+     */
     @Override
     public void disconnect() {
         try {
@@ -49,6 +86,13 @@ public class BaseClientConnection implements ClientConnection {
         }
     }
 
+    /**
+     * Sends a {@link BasePacket} to the connected server and optionally invokes a response callback.
+     *
+     * @param packet the packet to send
+     * @param responseCallback a {@link Consumer} to handle the response, may be {@code null}
+     * @return {@code true} if the packet was sent successfully, {@code false} if an error occurred
+     */
     @Override
     public boolean send(BasePacket packet, Consumer<BasePacket> responseCallback) {
         try {
@@ -61,7 +105,9 @@ public class BaseClientConnection implements ClientConnection {
             logger.config("[CLIENT] Packet 0x%04X sent with %d bytes".formatted(packet.hashCode(), bytes));
 
             // No callback provided
-            if (responseCallback == null) { return true; }
+            if (responseCallback == null) {
+                return true;
+            }
 
             responseCallback.accept(getPacket());
 
@@ -73,13 +119,17 @@ public class BaseClientConnection implements ClientConnection {
         return true;
     }
 
+    /**
+     * Reads a packet from the server and deserializes it into a {@link BasePacket}.
+     *
+     * @return the received {@link BasePacket}, or {@code null} if an error occurred
+     */
     private BasePacket getPacket() {
         try {
             buffer.clear();
             int read = client.read(buffer);
             buffer.flip();
 
-            // Serialize packet
             BasePacket basePacket = PacketBuilder.INSTANCE.buildPacket(buffer);
 
             logger.config("[CLIENT] Packet 0x%04X received %d bytes".formatted(basePacket.hashCode(), read));

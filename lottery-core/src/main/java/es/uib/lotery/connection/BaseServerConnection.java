@@ -16,58 +16,100 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+/**
+ * The {@code BaseServerConnection} class provides a low-level server-side
+ * socket implementation for receiving and responding to {@link BasePacket} objects.
+ * <p>
+ * It implements {@link ServerConnection} and manages a non-blocking {@link ServerSocketChannel}
+ * along with a {@link Selector} to handle multiple client connections asynchronously.
+ * </p>
+ *
+ * <p>Key responsibilities:</p>
+ * <ul>
+ *     <li>Start and bind a server socket on a specified address.</li>
+ *     <li>Accept incoming client connections.</li>
+ *     <li>Read packets from clients, handle them using {@link PacketHandleRegistry}, and reply if necessary.</li>
+ *     <li>Stop the server and release all resources gracefully.</li>
+ * </ul>
+ *
+ * <p>Logging is used extensively for tracking server events, connections, and errors.</p>
+ *
+ * @see ServerConnection
+ * @see BasePacket
+ * @see PacketHandleRegistry
+ * @see PacketBuilder
+ */
 public class BaseServerConnection implements ServerConnection {
+
+    /** Logger for server events and errors. */
     private static final Logger logger = Logger.getLogger(BaseServerConnection.class.getName());
+
+    /** The server socket channel used for accepting client connections. */
     private ServerSocketChannel serverSocketChannel;
+
+    /** Registry responsible for handling incoming packets. */
     private final PacketHandleRegistry handleRegistry;
+
+    /** Selector used for asynchronous channel management. */
     private Selector selector;
+
+    /** Buffer for reading and writing packet data. */
     private ByteBuffer buffer;
 
+    /**
+     * Creates a new {@code BaseServerConnection} with the provided {@link PacketHandleRegistry}.
+     *
+     * @param handleRegistry the registry used to handle incoming packets
+     */
     public BaseServerConnection(PacketHandleRegistry handleRegistry) {
         this.handleRegistry = handleRegistry;
     }
 
+    /**
+     * Starts the server by binding it to the specified address and preparing
+     * it for accepting connections.
+     *
+     * @param address the host and port to bind the server
+     * @return {@code true} if the server was successfully started, {@code false} otherwise
+     */
     @Override
     public boolean start(InetSocketAddress address) {
         try {
-            // Inicialización del canal de socket y buffer
             selector = Selector.open();
             serverSocketChannel = ServerSocketChannel.open();
             buffer = ByteBuffer.allocate(256);
 
-            // Conexión con el host en el puerto dado
             serverSocketChannel.bind(address);
             serverSocketChannel.configureBlocking(false);
             serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
 
         } catch (IOException e) {
-            logger.warning("[SERVER] Error: %s".formatted( e.getMessage()));
+            logger.warning("[SERVER] Error: %s".formatted(e.getMessage()));
             return false;
         }
 
-        // Conexión exitosa
         logger.config("[SERVER] Starting server on %s:%d...".formatted(address.getHostName(), address.getPort()));
         return true;
     }
 
+    /**
+     * Stops the server and closes all associated resources, including
+     * the server socket channel, selector, and buffer.
+     */
     @Override
     public void stop() {
         try {
-            // Cierra el canal del servidor si está abierto
             if (serverSocketChannel != null && serverSocketChannel.isOpen()) {
                 logger.config("[SERVER] Closing server");
                 serverSocketChannel.close();
             }
 
-            // Cierra el selector si está abierto
             if (selector != null && selector.isOpen()) {
                 logger.config("[SERVER] Selector closed");
                 selector.close();
             }
 
-            // Limpia el buffer
             buffer = null;
-
             logger.config("[SERVER] Server closed");
 
         } catch (IOException e) {
@@ -75,23 +117,26 @@ public class BaseServerConnection implements ServerConnection {
         }
     }
 
+    /**
+     * Listens for incoming connections and messages in an infinite loop.
+     * <p>
+     * Uses a {@link Selector} to handle multiple client connections asynchronously.
+     * Each packet received is processed using the {@link PacketHandleRegistry}.
+     * </p>
+     *
+     * @throws IOException if an I/O error occurs while listening
+     */
     @Override
     public void listen() throws IOException {
         while (true) {
-
-            // Obtención de las claves de selección que representan los canales listos
             selector.select();
             Set<SelectionKey> selectedKeys = selector.selectedKeys();
-
-            // Iteración sobre las claves seleccionadas
             Iterator<SelectionKey> iterator = selectedKeys.iterator();
+
             while (iterator.hasNext()) {
                 SelectionKey key = iterator.next();
 
-                // Si la clave representa una nueva conexión, se registra
                 if (key.isAcceptable()) register();
-
-                // Si la clave es legible, procesa el mensaje del cliente
                 if (key.isReadable()) reply(key);
 
                 iterator.remove();
@@ -99,9 +144,13 @@ public class BaseServerConnection implements ServerConnection {
         }
     }
 
+    /**
+     * Registers a new client connection by accepting it and configuring
+     * the channel for reading.
+     *
+     * @throws IOException if an I/O error occurs during registration
+     */
     private void register() throws IOException {
-
-        // Accept socket in read mode
         SocketChannel client = serverSocketChannel.accept();
         client.configureBlocking(false);
         client.register(selector, SelectionKey.OP_READ);
@@ -109,6 +158,12 @@ public class BaseServerConnection implements ServerConnection {
         logger.config("[SERVER] %s connected".formatted(client.getRemoteAddress()));
     }
 
+    /**
+     * Reads a packet from the client, processes it using the {@link PacketHandleRegistry},
+     * and replies if there are response packets.
+     *
+     * @param key the {@link SelectionKey} associated with the readable client channel
+     */
     private void reply(SelectionKey key) {
         SocketChannel client = (SocketChannel) key.channel();
 
@@ -130,10 +185,8 @@ public class BaseServerConnection implements ServerConnection {
 
             List<BasePacket> responses = handleRegistry.handlePacket(packet);
 
-            // No responses
             if (responses == null || responses.isEmpty()) return;
 
-            // Reply the client
             for (BasePacket response : responses) {
                 buffer.clear();
                 response.encode(buffer);
