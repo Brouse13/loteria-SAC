@@ -1,5 +1,7 @@
 package es.uib.lotery;
 
+import es.uib.lotery.utils.LoggingUtils;
+
 import java.util.logging.Logger;
 
 import static es.uib.lotery.utils.Constants.*;
@@ -22,7 +24,7 @@ import static es.uib.lotery.utils.Constants.*;
  * <p>If an exception occurs during startup or execution, the server is
  * gracefully disconnected and a warning is logged.</p>
  *
- * @author
+ * @author Brouse13
  * @version 1.0
  * @see Server
  * @see es.uib.lotery.utils.Constants
@@ -42,6 +44,7 @@ public class ServerSocket {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
+        LoggingUtils.loadConfiguration();
         Server server = new Server();
 
         try {

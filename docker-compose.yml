@@ -1,0 +1,66 @@
+services:
+  server:
+    build:
+      context: ./lottery-server
+      args:
+        VERSION: 1.1.0
+    image: lottery-server
+    container_name: lottery-server
+    environment:
+      JAR_ARGS: ""
+    volumes:
+      - ./config/server-configuration.yml:/app/configuration.yaml
+    ports:
+      - "9030:9030"
+    networks:
+      - lottery-net
+
+  dns:
+    build:
+      context: ./lottery-dns
+      args:
+        VERSION: 1.1.0
+    image: lottery-dns
+    container_name: lottery-dns
+    environment:
+      JAR_ARGS: ""
+    volumes:
+      - ./config/dns-configuration.yml:/app/configuration.yaml
+    ports:
+      - "9000:9000"
+    networks:
+      - lottery-net
+
+  seller:
+    build:
+      context: ./lottery-seller
+      args:
+        VERSION: 1.1.0
+    image: lottery-seller
+    container_name: lottery-seller
+    environment:
+      JAR_ARGS: "lottery-seller 9010 seller1"
+    volumes:
+      - ./config/seller-configuration.yml:/app/configuration.yaml
+    ports:
+      - "9010:9010"
+    networks:
+      - lottery-net
+
+  client:
+    build:
+      context: ./lottery-client
+      args:
+        VERSION: 1.1.0
+    image: lottery-client
+    container_name: lottery-client
+    environment:
+      JAR_ARGS: ""
+    volumes:
+      - ./config/client-configuration.yml:/app/configuration.yaml
+    networks:
+      - lottery-net
+
+networks:
+  lottery-net:
+    driver: bridge

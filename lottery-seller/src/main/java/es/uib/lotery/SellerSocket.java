@@ -1,5 +1,7 @@
 package es.uib.lotery;
 
+import es.uib.lotery.utils.LoggingUtils;
+
 import java.io.IOException;
 import java.util.logging.Logger;
 
@@ -37,8 +39,10 @@ public class SellerSocket {
      *             </ol>
      */
     public static void main(String[] args) {
+        LoggingUtils.loadConfiguration();
+
         if (args.length < 3) {
-            System.out.println("Usage: java -jar lottery-client.jar <sellerHost> <sellerPort> <sellerName>");
+            logger.warning("Usage: java -jar lottery-client.jar <sellerHost> <sellerPort> <sellerName>");
             return;
         }
 
@@ -52,6 +56,8 @@ public class SellerSocket {
 
         String sellerHost = args[0];
         String sellerName = args[2];
+
+        logger.info("Seller %s started on host %s and port %d".formatted(sellerName, sellerHost, sellerPort));
 
         new SellerSocket().start(sellerHost, sellerPort, sellerName);
     }

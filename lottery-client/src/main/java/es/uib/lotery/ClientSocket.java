@@ -2,6 +2,7 @@ package es.uib.lotery;
 
 import es.uib.lotery.packet.DNSRequestPacket;
 import es.uib.lotery.packet.SorteoRequestPacket;
+import es.uib.lotery.utils.LoggingUtils;
 
 import java.net.InetSocketAddress;
 import java.util.Random;
@@ -54,6 +55,7 @@ public class ClientSocket {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
+        LoggingUtils.loadConfiguration();
         new ClientSocket().start();
     }
 
@@ -71,6 +73,7 @@ public class ClientSocket {
         Client client = new Client();
 
         // Retrieve seller address from DNS
+        logger.info("Trying to connect to %s %d\n".formatted(DNS_HOST, DNS_PORT));
         if (client.connectToServer(DNS_HOST, DNS_PORT)) {
             DNSRequestPacket packet = new DNSRequestPacket();
             client.requestAddress(packet, serverAddress::set);
