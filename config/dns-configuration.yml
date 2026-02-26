@@ -1,0 +1,6 @@
+dnsHost: "lottery-dns"        # DNS host
+dnsPort: 9000                 # DNS port
+serverHost: "lottery-server"  # Server host
+serverPort: 9030              # Server port
+retryInSeconds: 3             # Time between lottery request from the client to the server
+randomSize: 100               # Size of the numbers on the raffle [0 - n]
