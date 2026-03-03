@@ -7,10 +7,6 @@ pipeline {
         KUBE_CONFIG = credentials('kubeconfig-id')
     }
 
-    tools {
-		maven 'Maven 3.8.8'
-    }
-
     stages {
 
         stage('Checkout') {
