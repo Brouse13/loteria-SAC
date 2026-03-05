@@ -4,7 +4,6 @@ pipeline {
     environment {
         REGISTRY = "brouse13"
         IMAGE_TAG = "${BUILD_NUMBER}"
-        KUBE_CONFIG = credentials('kubeconfig-id')
     }
 
     stages {
@@ -44,22 +43,6 @@ pipeline {
                         for (module in modules) {
                             sh "docker push $REGISTRY/${module}:${IMAGE_TAG}"
                         }
-                    }
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                script {
-                    def modules = ["lottery-client", "lottery-server", "lottery-dns", "lottery-seller"]
-
-                    for (module in modules) {
-                        sh """
-                        kubectl set image deployment/${module} \
-                        ${module}=$REGISTRY/${module}:${IMAGE_TAG} \
-                        --kubeconfig=$KUBE_CONFIG
-                        """
                     }
                 }
             }
